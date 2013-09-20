@@ -3,7 +3,7 @@ from xml.etree.ElementTree import Element, tostring, XML
 
 
 class XMLSerializerMixin(object):
-    
+
     """
     Provide serialize to xml functionality to inheriting classes.
     
@@ -40,15 +40,15 @@ class XMLSerializerMixin(object):
         Args:
         obj -- the actual object to work with (can be an XMLSerializerMixin
                or any class)
-        """        
+        """
         xml = Element(obj.__class__.__name__)
         xml.attrib['module'] = obj.__class__.__module__
         
         for key in obj.__dict__:
-            value = obj.__dict__[key]            
-            child = Element(key)            
-            func = self._serializer_function(value)            
-            child.append(func(value))                               
+            value = obj.__dict__[key]
+            child = Element(key)
+            func = self._serializer_function(value)
+            child.append(func(value))
             child[0].attrib['module'] = value.__class__.__module__
             xml.append(child)
             
@@ -92,7 +92,7 @@ class XMLSerializerMixin(object):
             
         return xml
         
-    def _to_xml_list_and_tuple(self, obj):
+    def _to_xml_iterable(self, obj):
         """
         Return the xml Element of a list or tuple.
         
@@ -110,7 +110,7 @@ class XMLSerializerMixin(object):
             
         return xml
         
-    _to_xml_list = _to_xml_tuple = _to_xml_list_and_tuple    
+    _to_xml_list = _to_xml_tuple = _to_xml_iterable
 
     def _serializer_function(self, obj):
         """
@@ -131,7 +131,7 @@ class XMLSerializerMixin(object):
         return func
         
     
-    @staticmethod    
+    @staticmethod
     def from_xml(xml):
         """
         Return the Python object retrieved from the xml.
@@ -141,7 +141,7 @@ class XMLSerializerMixin(object):
         """
         return XMLSerializerMixin._from_xml(XML(xml))
     
-    @staticmethod    
+    @staticmethod
     def _from_xml(parsed):
         """
         Return the Python object retrieved from the parsed xml.
@@ -205,7 +205,7 @@ class XMLSerializerMixin(object):
         return obj
     
     @staticmethod
-    def _from_xml_list(parsed):
+    def _from_xml_iterable(parsed):
         """
         Return the builtin `list` or `tuple` type from the xml.
         
@@ -222,11 +222,13 @@ class XMLSerializerMixin(object):
             obj.append(func(child[0]))
             
         return obj
-        
-    @staticmethod
-    def _from_xml_tuple(parsed):
-        lst = XMLSerializerMixin._from_xml_list(parsed)
-        return tuple(lst)
+
+    
+    _from_xml_list = _from_xml_iterable
+    _from_xml_tuple = staticmethod(
+            lambda parsed : tuple(XMLSerializerMixin._from_xml_iterable(parsed))
+    )
+    _from_xml_set = _from_xml_iterable
         
     @staticmethod
     def _deserializer_function(tag):
@@ -241,7 +243,7 @@ class XMLSerializerMixin(object):
         obj -- the element's tag that needs to be de-serialied
         """
         try:
-            func = getattr(XMLSerializerMixin, 
+            func = getattr(XMLSerializerMixin,
                            '_from_xml_' + tag)
         except AttributeError:
             func = XMLSerializerMixin._from_xml
