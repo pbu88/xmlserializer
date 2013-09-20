@@ -13,18 +13,22 @@ class XMLSerializerMixin(object):
     
     Private Functions:
     _to_xml -- Does the `to_xml`'s actual job.
-    _to_xml_int
-    _to_xml_str
-    _to_xml_dict
-    _to_xml_list
-    _to_xml_tuple
+    _to_xml_int -- Returns an int's object xml Element
+    _to_xml_str -- Returns an str's object xml Element
+    _to_xml_unicode -- Returns an str's object xml Element
+    _to_xml_dict -- Returns an dict's object xml Element
+    _to_xml_list -- Returns an list's object xml Element
+    _to_xml_tuple -- Returns an tuple's object xml Element
+    _to_xml_set -- Returns an set's object xml Element
     
     _from_xml (static) -- Does the `from_xml`'s actual job.
-    _from_xml_int (static)
-    _from_xml_str (static)
-    _from_xml_dict (static)
-    _from_xml_list (static)
-    _from_xml_tuple (static)
+    _from_xml_int (static) -- Returns the int object from the xml Element
+    _from_xml_str (static) -- Returns the str object from the xml Element
+    _from_xml_unicode (static) -- Returns the str object from the xml Element
+    _from_xml_dict (static) -- Returns the dict object from the xml Element
+    _from_xml_list (static) -- Returns the list object from the xml Element
+    _from_xml_tuple (static) -- Returns the tuple object from the xml Element
+    _from_xml_set (static) -- Returns the set object from the xml Element
     """
     
     def to_xml(self):
@@ -63,10 +67,14 @@ class XMLSerializerMixin(object):
         """
         xml = Element(obj.__class__.__name__)
         xml.attrib['module'] = obj.__class__.__module__
-        xml.text = str(obj)
+        if obj.__class__.__name__ == 'unicode':
+            xml.text = unicode(obj)
+        else:
+            xml.text = str(obj)
+        
         return xml
     
-    _to_xml_int = _to_xml_str = _to_xml_int_and_str
+    _to_xml_int = _to_xml_str = _to_xml_unicode = _to_xml_int_and_str
     
     def _to_xml_dict(self, obj):
         """
@@ -178,7 +186,7 @@ class XMLSerializerMixin(object):
         obj = cls(parsed.text)
         return obj
         
-    _from_xml_int = _from_xml_str = _from_xml_int_and_str
+    _from_xml_int = _from_xml_str = _from_xml_unicode = _from_xml_int_and_str
     
     @staticmethod
     def _from_xml_dict(parsed):

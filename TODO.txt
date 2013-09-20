@@ -2,6 +2,7 @@ TODO:
 
 - Add capability to handle different encodings (like utf-8)
 - Include more built-in types (like `array` for example)
+- Need to write tests for `unicode` data type serialization
 - Think a way to generalize it to be used as a Mixin and as a normal
   Python object to serialize stuff
 - Extend this TODO :)
